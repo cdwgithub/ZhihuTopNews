@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">知乎头条</string>
+    <string name="goodpictures">好图</string>
+    <string name="todaynews">今日头条</string>
+    <string name="zhihu">知乎</string>
+    <string name="nev_title">个人主页</string>
+    <string name="open">打开</string>
+    <string name="snack_infor">请检查网络</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="app_exit_tip">再点一次，退出</string>
+</resources>
