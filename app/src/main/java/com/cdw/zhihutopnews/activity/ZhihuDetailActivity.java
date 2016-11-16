@@ -3,7 +3,6 @@ package com.cdw.zhihutopnews.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,20 +12,14 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.transition.ChangeBounds;
-import android.transition.Transition;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -39,13 +32,11 @@ import com.cdw.zhihutopnews.config.Config;
 import com.cdw.zhihutopnews.presenter.IZhihuStoryPresenter;
 import com.cdw.zhihutopnews.presenter.implePresenter.ZhihuStoryPresenterImpl;
 import com.cdw.zhihutopnews.presenter.impleView.IZhihuStory;
-import com.cdw.zhihutopnews.uitls.AnimUtils;
 import com.cdw.zhihutopnews.uitls.ColorUtils;
 import com.cdw.zhihutopnews.uitls.DensityUtil;
 import com.cdw.zhihutopnews.uitls.GlideUtils;
 import com.cdw.zhihutopnews.uitls.ViewUtils;
 import com.cdw.zhihutopnews.uitls.WebUtil;
-import com.cdw.zhihutopnews.widget.ElasticDragDismissFrameLayout;
 import com.cdw.zhihutopnews.widget.ParallaxScrimageView;
 import com.cdw.zhihutopnews.widget.TranslateYTextView;
 
@@ -57,18 +48,16 @@ import butterknife.OnClick;
 
 public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
-   @BindView(R.id.shot)
-   ParallaxScrimageView parallaxScrimageView;
-   // @BindView(R.id.title)
-   // TranslateYTextView translateYTextView;
+    @BindView(R.id.shot)
+    ParallaxScrimageView parallaxScrimageView;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.wv_zhihu)
     WebView wvZhihu;
     @BindView(R.id.nest)
     NestedScrollView nest;
- //   @BindView(R.id.draggable_frame)
-  //  ElasticDragDismissFrameLayout draggableFrame;//随意拖拽退出当前界面的交互的开源框架
+    @BindView(R.id.title)
+    TranslateYTextView translateYTextView;
 
 
     private int[] DevicesInfo;
@@ -81,11 +70,10 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
     private boolean isEmpty;
     private String body;
     private String[] scc;
-    private static final float SCRIM_ADJUSTMENT = 0.075f;
+    private boolean isToolbarenable = true;
     private IZhihuStoryPresenter iZhihuStoryPresenter;
-   // private Transition.TransitionListener zhihuReturnHomeListener;//从转变过渡的监听器接收通知
     private NestedScrollView.OnScrollChangeListener scrollListener;
-   // private ElasticDragDismissFrameLayout.SystemChromeFader chromeFader;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,85 +84,68 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
         width = DevicesInfo[0];
         height = 3 * width / 4;
         setSupportActionBar(toolbar);
-      //  initListener();
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        initlistenr();
         initData();
         initView();
         getData();
 
 
-     //   chromeFader = new ElasticDragDismissFrameLayout.SystemChromeFader(this);
-       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-            getWindow().getSharedElementReturnTransition().addListener(zhihuReturnHomeListener);
-            getWindow().setSharedElementEnterTransition(new ChangeBounds());
-        }*/
-
-        enterAnimation();
-
     }
 
+    private void initlistenr() {
+        scrollListener = new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
 
-    private void enterAnimation() {
-        float offSet = toolbar.getHeight();
-        LinearInterpolator interpolator = new LinearInterpolator();
-        viewEnterAnimation(parallaxScrimageView, offSet, interpolator);
-        viewEnterAnimationNest(nest, 0f, interpolator);
+                if (oldScrollY < parallaxScrimageView.getHeight()) {
+                    parallaxScrimageView.setOffset(-oldScrollY);
+                    translateYTextView.setOffset(-oldScrollY);
+                }
+                if (scrollY >= oldScrollY && (scrollY - oldScrollY) <= toolbar.getHeight()) {
+                    float alpha = 1 - (float) scrollY / toolbar.getHeight();
+                    toolbar.setAlpha(alpha);//根据向下滑动的距离逐渐隐藏toolbar
+                    if (alpha <= 0.0f) {
+                        isToolbarenable = false;
+                    }
+                } else {
+                    toolbar.setAlpha(1);//toolbar透明度为1，即正常显示toolbar
+                    isToolbarenable = true;
+                }
+
+
+            }
+
+        };
     }
 
-    private void viewEnterAnimation(View view, float offset, Interpolator interp) {
-        view.setTranslationY(-offset);
-        view.setAlpha(0f);
-        view.animate()
-                .translationY(0f)
-                .alpha(1f)
-                .setDuration(500L)
-                .setInterpolator(interp)
-                .setListener(null)
-                .start();
-    }
-
-    private void viewEnterAnimationNest(View view, float offset, Interpolator interp) {
-        view.setTranslationY(-offset);
-        view.setAlpha(0.3f);
-        view.animate()
-                .translationY(0f)
-                .alpha(1f)
-                .setDuration(500L)
-                .setInterpolator(interp)
-                .setListener(null)
-                .start();
-    }
 
     private void getData() {
-        iZhihuStoryPresenter.getZhihuStory(id);
+        iZhihuStoryPresenter.getZhihuStory(id);//根据ID获取新闻明细
     }
 
     private void initView() {
-        toolbar.setTitleMargin(20, 20, 0, 10);
+        translateYTextView.setText(title);
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
-        toolbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                nest.smoothScrollTo(0, 0);
-            }
-        });
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (isToolbarenable) {
+                    expandImageAndFinish();
+                }
 
-                expandImageAndFinish();
             }
 
 
         });
-        //translateYTextView.setText(title);
+
 
         WebSettings settings = wvZhihu.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         settings.setLoadWithOverviewMode(true);
         settings.setBuiltInZoomControls(true);
-        //settings.setUseWideViewPort(true);造成文字太小
+
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
         settings.setAppCachePath(getCacheDir().getAbsolutePath() + "/webViewCache");
@@ -183,7 +154,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
         wvZhihu.setWebChromeClient(new WebChromeClient());
     }
 
-   private void expandImageAndFinish() {
+    private void expandImageAndFinish() {
         if (parallaxScrimageView.getOffset() != 0f) {
             Animator expandImage = ObjectAnimator.ofFloat(parallaxScrimageView, ParallaxScrimageView.OFFSET,
                     0f);
@@ -211,18 +182,23 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
     }
 
     private void initData() {
-        id = getIntent().getStringExtra("id");
-        title = getIntent().getStringExtra("title");
-        imageUrl = getIntent().getStringExtra("image");
+
+        id = getIntent().getStringExtra("id");//获取新闻id
+        title = getIntent().getStringExtra("title");//获取新闻标题
+        imageUrl = getIntent().getStringExtra("image");//获取新闻首张图片
         iZhihuStoryPresenter = new ZhihuStoryPresenterImpl(this);
         nest.setOnScrollChangeListener(scrollListener);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //调用postponeEnterTransition()方法来暂时阻止启动共享元素 Transition
             postponeEnterTransition();
             parallaxScrimageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
                     parallaxScrimageView.getViewTreeObserver().removeOnPreDrawListener(this);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        //在共享元素准备好后调用startPostponedEnterTransition来恢复过渡效果。
+                        // 常见的模式是在一个OnPreDrawListener中启动延时 Transition，
+                        //  它会在共享元素测量和布局完毕后被调用
                         startPostponedEnterTransition();
                     }
                     return true;
@@ -231,46 +207,11 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
         }
     }
 
-   /* private void initListener() {
-        zhihuReturnHomeListener = new AnimUtils.TransitionListenerAdapter() {
-            @Override
-            public void onTransitionStart(Transition transition) {
-                super.onTransitionStart(transition);
-
-                Log.d("ZhihuDetailActivity", "toobar->transitiolistener////////");
-                toolbar.animate()
-                        .alpha(0f)
-                        .setDuration(100)
-                        .setInterpolator(new AccelerateInterpolator());
-               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    parallaxScrimageView.setElevation(1f);
-                    toolbar.setElevation(0f);
-                }
-
-                nest.animate()
-                        .alpha(0f)
-                        .setDuration(50)
-                        .setInterpolator(new AccelerateInterpolator());
-
-            }
-        };
-        scrollListener = new NestedScrollView.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                if (oldScrollY < 168) {
-                    Log.d("ZhihuDetailActivity", "toobar->onScrollChange////////");
-                    parallaxScrimageView.setOffset(-oldScrollY);
-                   // translateYTextView.setOffset(-oldScrollY);
-                }
-            }
-        };
-    }*/
-
 
     @Override
     protected void onResume() {
         super.onResume();
-       // draggableFrame.addListener(chromeFader);
+
         try {
             wvZhihu.getClass().getMethod("onResume").invoke(wvZhihu, (Object[]) null);
         } catch (IllegalAccessException e) {
@@ -284,7 +225,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
     @Override
     protected void onPause() {
-       // draggableFrame.removeListener(chromeFader);
+
         try {
             wvZhihu.getClass().getMethod("onPause").invoke(wvZhihu, (Object[]) null);
         } catch (IllegalAccessException e) {
@@ -299,10 +240,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
     @Override
     protected void onDestroy() {
-      /*  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
-            getWindow().getSharedElementReturnTransition().removeListener(zhihuReturnHomeListener);
-        }*/
         //webview内存泄露
         if (wvZhihu != null) {
             ((ViewGroup) wvZhihu.getParent()).removeView(wvZhihu);
@@ -317,7 +255,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-       expandImageAndFinish();
+        expandImageAndFinish();
     }
 
     @Override
@@ -336,7 +274,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
                 .load(zhihuStory.getImage()).centerCrop()
                 .listener(loadListener).override(width, height)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-               .into(parallaxScrimageView);
+                .into(parallaxScrimageView);
         url = zhihuStory.getShareUrl();
         isEmpty = TextUtils.isEmpty(zhihuStory.getBody());
         body = zhihuStory.getBody();
@@ -381,7 +319,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
                             // color the status bar. Set a complementary dark color on L,
                             // light or dark color on M (with matching status bar icons)
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                           /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
 
                                 int statusBarColor = getWindow().getStatusBarColor();
@@ -392,13 +330,13 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
                                     statusBarColor = ColorUtils.scrimify(topColor.getRgb(),
                                             isDark, SCRIM_ADJUSTMENT);
                                     // set a light status bar on M+
-                                   if (!isDark && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    if (!isDark && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                         ViewUtils.setLightStatusBar(parallaxScrimageView);
                                     }
                                 }
 
                                 if (statusBarColor != getWindow().getStatusBarColor()) {
-                                  parallaxScrimageView.setScrimColor(statusBarColor);
+                                    parallaxScrimageView.setScrimColor(statusBarColor);
                                     ValueAnimator statusBarColorAnim = ValueAnimator.ofArgb(
                                             getWindow().getStatusBarColor(), statusBarColor);
                                     statusBarColorAnim.addUpdateListener(new ValueAnimator
@@ -414,7 +352,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
                                             new AccelerateInterpolator());
                                     statusBarColorAnim.start();
                                 }
-                            }
+                            }*/
 
                         }
                     });
@@ -430,7 +368,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
                             // for the scrim
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
-                             parallaxScrimageView.setForeground(ViewUtils.createRipple(palette, 0.3f, 0.6f,
+                                parallaxScrimageView.setForeground(ViewUtils.createRipple(palette, 0.3f, 0.6f,
                                         ContextCompat.getColor(ZhihuDetailActivity.this, R.color.mid_grey),
                                         true));
                             }
@@ -438,7 +376,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
                     });
 
             // TODO should keep the background if the image contains transparency?!
-          parallaxScrimageView.setBackground(null);
+            parallaxScrimageView.setBackground(null);
             return false;
         }
     };

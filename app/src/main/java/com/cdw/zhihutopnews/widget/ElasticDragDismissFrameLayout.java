@@ -157,19 +157,6 @@ public class ElasticDragDismissFrameLayout extends FrameLayout {
         if (scroll == 0) return;
 
 
-        // track the direction & set the pivot point for scaling
-        // don't double track i.e. if start dragging down and then reverse, keep tracking as
-        // dragging down until they reach the 'natural' position
-//        if (scroll < 0 && !draggingUp && !draggingDown) {
-//            draggingDown = true;
-//            if (shouldScale) setPivotY(getHeight());
-//        } else if (scroll > 0 && !draggingDown && !draggingUp) {
-//            draggingUp = true;
-//            if (shouldScale) setPivotY(0f);
-//        }
-
-        // how far have we dragged relative to the distance to perform a dismiss
-        // (0–1 where 1 = dismiss distance). Decreasing logarithmically as we approach the limit
 
         if (isHorizontal&&!draggingDown&&!draggingUp) {
             totalDrag += scroll;
@@ -193,19 +180,12 @@ public class ElasticDragDismissFrameLayout extends FrameLayout {
 
 
 
-//            float dragTo = dragFraction * dragDismissDistance * dragElacticity;
-//            dispatchDragCallback(dragFraction, dragTo,
-//                    Math.min(1f, Math.abs(totalDrag) / dragDismissDistance), totalDrag);
+
 
         }
 
 
-        // if we've reversed direction and gone past the settle point then clear the flags to
-        // allow the list to get the scroll events & reset any transforms
-//        if (!isHorizontal) {
-//            setScaleX(1f);
-//            setScaleY(1f);
-//        }
+
 
 
     }

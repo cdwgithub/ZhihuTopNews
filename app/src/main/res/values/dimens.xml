@@ -23,4 +23,7 @@
     <dimen name="spacing_huge">64dp</dimen>
     <dimen name="padding_normal">16dp</dimen>
     <dimen name="divider_height">1px</dimen>
+
+    <dimen name="drag_dismiss_distance">112dp</dimen> <!-- 2 * ?android:actionBarSize -->
+    <dimen name="touched_app_bar">8dp</dimen>
 </resources>

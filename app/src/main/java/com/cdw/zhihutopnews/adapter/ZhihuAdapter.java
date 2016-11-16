@@ -24,7 +24,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.cdw.zhihutopnews.MainActivity;
 import com.cdw.zhihutopnews.R;
-import com.cdw.zhihutopnews.activity.ZhihuuDetailActivity;
+import com.cdw.zhihutopnews.activity.ZhihuDetailActivity;
 import com.cdw.zhihutopnews.bean.ZhihuDailyItem;
 import com.cdw.zhihutopnews.config.Config;
 import com.cdw.zhihutopnews.uitls.DBUtils;
@@ -164,11 +164,10 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         DBUtils.getDB(context).insertHasRead(Config.ZHIHU, zhihuDailyItem.getId(), 1);
         holder.textView.setTextColor(Color.GRAY);
-        Intent intent = new Intent(context, ZhihuuDetailActivity.class);
+        Intent intent = new Intent(context, ZhihuDetailActivity.class);
         intent.putExtra("id", zhihuDailyItem.getId());
         intent.putExtra("title", zhihuDailyItem.getTitle());
         intent.putExtra("image",imageUrl);
-
         context.startActivity(intent);
 
     }
