@@ -1,17 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <!--Light Color-->
+    <color name="toolbar_background_light">#3F51B5</color>
+    <color name="background_light">#ffffff</color>
+    <color name="cardview_background_light">#fafafa</color>
+    <color name="text_light">#000000</color>
+    <color name="text_secondary_light">#b3ffffff</color> <!-- 70% -->
+    <!--Night Color-->
+    <color name="toolbar_background_dark">#ff292929</color>
+    <color name="background_dark">#ff333333</color>
+    <color name="cardview_background_dark">#ff444444</color>
+    <color name="text_primary_dark">#fafafa</color> <!-- 87% -->
+    <color name="text_secondary_dark">#40808080</color> <!-- 54% -->
+
+
+
+
+
+
+
+
     <color name="white">#FFFFFF</color>
     <color name="status_bar_back">#ff676767</color>
-    <color name="text_primary_light">#ffffffff</color>
+
     <color name="nev_item">#ffffffff</color>
 
 
     <color name="primary">#69F0AE</color>
     <color name="accent">@color/primary</color>
-    <color name="background_light">#fafafa</color>
+
     <color name="primary_super_dark">#11261c</color>
     <color name="background_super_dark">#ff292929</color>
     <color name="hint_disabled_dark">#43000000</color>
@@ -20,7 +37,7 @@
     <color name="ripple_dark">#40808080</color>
     <color name="mid_grey">#40808080</color>
     <color name="text_color">#f6000000</color>
-    <dimen name="text_size">18sp</dimen>
+
     <color name="content_placeholder">#ffe0e0e0</color>
     <color name="gif_badge_light_image">#40000000</color>
     <color name="gif_badge_dark_image">#b3ffffff</color>
@@ -29,4 +46,7 @@
     <color name="dribbble">#fff06292</color> <!-- pink 300 -->
     <color name="dribbble_dark">#ec407a</color> <!-- pink 400 -->
     <color name="dribbble_super_dark">#ff33292d</color>
+
+
+
 </resources>

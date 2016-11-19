@@ -20,8 +20,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.annotation.ColorInt;
-import android.support.annotation.FloatRange;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Property;
@@ -48,6 +46,7 @@ public class ParallaxScrimageView extends FourThreeImageView {
     private float parallaxFactor = -0.5f;
     private boolean isPinned = false;
     private boolean immediatePin = false;
+    //设置属性动画
     public static final Property<ParallaxScrimageView, Float> OFFSET = new AnimUtils
             .FloatProperty<ParallaxScrimageView>("offset") {
 
@@ -88,34 +87,34 @@ public class ParallaxScrimageView extends FourThreeImageView {
     }
 
     public float getOffset() {
-        return getTranslationY();
+        return getTranslationY();////获取内容偏移量ScrollY的值
     }
 
     public void setOffset(float offset) {
         offset = Math.max(minOffset, offset);
-        if (offset != getTranslationY()) {
+       // if (offset != getTranslationY()) {
             setTranslationY(offset);
             imageOffset = (int) (offset * parallaxFactor);
-            setScrimAlpha(Math.min((-offset / getMinimumHeight()) * maxScrimAlpha, maxScrimAlpha));
+           // setScrimAlpha(Math.min((-offset / getMinimumHeight()) * maxScrimAlpha, maxScrimAlpha));
             ViewCompat.postInvalidateOnAnimation(this);
-        }
+       // }
         setPinned(offset == minOffset);
     }
 
-    public void setScrimColor(@ColorInt int scrimColor) {
+  /*  public void setScrimColor(@ColorInt int scrimColor) {
         if (this.scrimColor != scrimColor) {
             this.scrimColor = scrimColor;
             ViewCompat.postInvalidateOnAnimation(this);
         }
-    }
+    }*/
 
-    public void setScrimAlpha(@FloatRange(from = 0f, to = 1f) float alpha) {
-        if (scrimAlpha != alpha) {
+   /*   public void setScrimAlpha(@FloatRange(from = 0f, to = 1f) float alpha) {
+      if (scrimAlpha != alpha) {
             scrimAlpha = alpha;
-            scrimPaint.setColor(ColorUtils.modifyAlpha(scrimColor, scrimAlpha));
+            scrimPaint.setColor(ColorUtils.modifyAlpha(scrimColor,0.85f));
             ViewCompat.postInvalidateOnAnimation(this);
         }
-    }
+    }*/
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {

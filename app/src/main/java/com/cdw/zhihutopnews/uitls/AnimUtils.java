@@ -18,7 +18,9 @@ package com.cdw.zhihutopnews.uitls;
 
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.transition.Transition;
 import android.util.ArrayMap;
 import android.util.Property;
@@ -132,6 +134,7 @@ public class AnimUtils {
      * Interrupting Activity transitions can yield an OperationNotSupportedException when the
      * transition tries to pause the animator. Yikes! We can fix this by wrapping the Animator:
      */
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static class NoPauseAnimator extends Animator {
         private final Animator mAnimator;
         private final ArrayMap<AnimatorListener, AnimatorListener> mListeners =
@@ -144,9 +147,11 @@ public class AnimUtils {
         @Override
         public void addListener(AnimatorListener listener) {
             AnimatorListener wrapper = new AnimatorListenerWrapper(this, listener);
-            if (!mListeners.containsKey(listener)) {
-                mListeners.put(listener, wrapper);
-                mAnimator.addListener(wrapper);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (!mListeners.containsKey(listener)) {
+                    mListeners.put(listener, wrapper);
+                    mAnimator.addListener(wrapper);
+                }
             }
         }
 
@@ -167,7 +172,10 @@ public class AnimUtils {
 
         @Override
         public TimeInterpolator getInterpolator() {
-            return mAnimator.getInterpolator();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                return mAnimator.getInterpolator();
+            }
+            return null;
         }
 
         @Override
@@ -177,7 +185,10 @@ public class AnimUtils {
 
         @Override
         public ArrayList<AnimatorListener> getListeners() {
-            return new ArrayList<AnimatorListener>(mListeners.keySet());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                return new ArrayList<AnimatorListener>(mListeners.keySet());
+            }
+            return null;
         }
 
         @Override
@@ -192,7 +203,10 @@ public class AnimUtils {
 
         @Override
         public boolean isPaused() {
-            return mAnimator.isPaused();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                return mAnimator.isPaused();
+            }
+            return false;
         }
 
         @Override
@@ -218,15 +232,22 @@ public class AnimUtils {
 
         @Override
         public void removeAllListeners() {
-            mListeners.clear();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                mListeners.clear();
+            }
             mAnimator.removeAllListeners();
         }
 
         @Override
         public void removeListener(AnimatorListener listener) {
-            AnimatorListener wrapper = mListeners.get(listener);
+            AnimatorListener wrapper = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                wrapper = mListeners.get(listener);
+            }
             if (wrapper != null) {
-                mListeners.remove(listener);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    mListeners.remove(listener);
+                }
                 mAnimator.removeListener(wrapper);
             }
         }
@@ -288,6 +309,7 @@ public class AnimUtils {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static class TransitionListenerAdapter implements Transition.TransitionListener {
 
         @Override

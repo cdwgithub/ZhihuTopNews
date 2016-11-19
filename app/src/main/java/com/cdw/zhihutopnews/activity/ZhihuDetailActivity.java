@@ -7,12 +7,13 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -35,7 +36,6 @@ import com.cdw.zhihutopnews.presenter.impleView.IZhihuStory;
 import com.cdw.zhihutopnews.uitls.ColorUtils;
 import com.cdw.zhihutopnews.uitls.DensityUtil;
 import com.cdw.zhihutopnews.uitls.GlideUtils;
-import com.cdw.zhihutopnews.uitls.ViewUtils;
 import com.cdw.zhihutopnews.uitls.WebUtil;
 import com.cdw.zhihutopnews.widget.ParallaxScrimageView;
 import com.cdw.zhihutopnews.widget.TranslateYTextView;
@@ -78,13 +78,17 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        changeTheme(Config.isNight);
         setContentView(R.layout.activity_zhihu_detail);
         ButterKnife.bind(this);
         DevicesInfo = DensityUtil.getDeviceInfo(this);//获取屏幕分辨率信息
         width = DevicesInfo[0];
         height = 3 * width / 4;
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+
         initlistenr();
         initData();
         initView();
@@ -92,7 +96,17 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
 
     }
+    /**
+     * 这只白天黑夜主题模式
+     */
+    private void changeTheme(boolean display_model) {
+        if(display_model){
+            setTheme(R.style.AppTheme_Night);//夜间模式
+        }else {
+            setTheme(R.style.AppTheme_Light);//白天模式
+        }
 
+    }
     private void initlistenr() {
         scrollListener = new NestedScrollView.OnScrollChangeListener() {
             @Override
@@ -103,12 +117,12 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
                     translateYTextView.setOffset(-oldScrollY);
                 }
                 if (scrollY >= oldScrollY && (scrollY - oldScrollY) <= toolbar.getHeight()) {
-                    float alpha = 1 - (float) scrollY / toolbar.getHeight();
+                    float alpha = 1 - (float) scrollY / (toolbar.getHeight() * 2);
                     toolbar.setAlpha(alpha);//根据向下滑动的距离逐渐隐藏toolbar
                     if (alpha <= 0.0f) {
                         isToolbarenable = false;
                     }
-                } else {
+                } else if (scrollY < oldScrollY && (oldScrollY - scrollY) > 10) {
                     toolbar.setAlpha(1);//toolbar透明度为1，即正常显示toolbar
                     isToolbarenable = true;
                 }
@@ -117,6 +131,16 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
             }
 
         };
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isToolbarenable) {
+                    expandImageAndFinish();
+                }
+            }
+        });
+
     }
 
 
@@ -126,26 +150,11 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
     private void initView() {
         translateYTextView.setText(title);
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isToolbarenable) {
-                    expandImageAndFinish();
-                }
-
-            }
-
-
-        });
-
-
         WebSettings settings = wvZhihu.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         settings.setLoadWithOverviewMode(true);
         settings.setBuiltInZoomControls(true);
-
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
         settings.setAppCachePath(getCacheDir().getAbsolutePath() + "/webViewCache");
@@ -252,6 +261,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
     }
 
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -319,40 +329,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
                             // color the status bar. Set a complementary dark color on L,
                             // light or dark color on M (with matching status bar icons)
-                           /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
-
-                                int statusBarColor = getWindow().getStatusBarColor();
-                                final Palette.Swatch topColor =
-                                        ColorUtils.getMostPopulousSwatch(palette);
-                                if (topColor != null &&
-                                        (isDark || Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)) {
-                                    statusBarColor = ColorUtils.scrimify(topColor.getRgb(),
-                                            isDark, SCRIM_ADJUSTMENT);
-                                    // set a light status bar on M+
-                                    if (!isDark && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                        ViewUtils.setLightStatusBar(parallaxScrimageView);
-                                    }
-                                }
-
-                                if (statusBarColor != getWindow().getStatusBarColor()) {
-                                    parallaxScrimageView.setScrimColor(statusBarColor);
-                                    ValueAnimator statusBarColorAnim = ValueAnimator.ofArgb(
-                                            getWindow().getStatusBarColor(), statusBarColor);
-                                    statusBarColorAnim.addUpdateListener(new ValueAnimator
-                                            .AnimatorUpdateListener() {
-                                        @Override
-                                        public void onAnimationUpdate(ValueAnimator animation) {
-                                            getWindow().setStatusBarColor(
-                                                    (int) animation.getAnimatedValue());
-                                        }
-                                    });
-                                    statusBarColorAnim.setDuration(1000L);
-                                    statusBarColorAnim.setInterpolator(
-                                            new AccelerateInterpolator());
-                                    statusBarColorAnim.start();
-                                }
-                            }*/
 
                         }
                     });
@@ -366,12 +343,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
                             // slightly more opaque ripple on the pinned image to compensate
                             // for the scrim
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
-                                parallaxScrimageView.setForeground(ViewUtils.createRipple(palette, 0.3f, 0.6f,
-                                        ContextCompat.getColor(ZhihuDetailActivity.this, R.color.mid_grey),
-                                        true));
-                            }
                         }
                     });
 

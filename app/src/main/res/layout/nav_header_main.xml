@@ -12,8 +12,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:fitsSystemWindows="true"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
-
-
     <TextView
         android:id="@+id/image_description"
         android:layout_width="match_parent"

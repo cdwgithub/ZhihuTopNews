@@ -4,10 +4,9 @@
     <string name="todaynews">今日头条</string>
     <string name="zhihu">知乎</string>
     <string name="nev_title">个人主页</string>
-    <string name="open">打开</string>
+    <string name="display_model_night">夜间模式</string>
+    <string name="display_model_light">日间模式</string>
     <string name="snack_infor">请检查网络</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="app_exit_tip">再点一次，退出</string>
 
     <string name="transition_shot_background" translatable="false">shot_background</string>

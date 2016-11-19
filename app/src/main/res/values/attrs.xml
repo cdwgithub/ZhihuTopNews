@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="toolbar_background" format="reference|color"/>
+    <attr name="main_background" format="reference|color"/>
+    <attr name="cardview_background" format="reference|color"/>
+    <attr name="text_primary" format="reference|color"/>
+    <attr name="text_secondary" format="reference|color"/>
+
+
+
+
+</resources>

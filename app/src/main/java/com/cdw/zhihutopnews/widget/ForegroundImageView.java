@@ -16,7 +16,7 @@
 
 package com.cdw.zhihutopnews.widget;
 
-import android.annotation.TargetApi;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -39,14 +39,16 @@ public class ForegroundImageView extends ImageView {
     public ForegroundImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ForegroundView);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ForegroundView);////从layout设置的属性集中获取attrs中的属性
 
-        final Drawable d = a.getDrawable(R.styleable.ForegroundView_android_foreground);
+        final Drawable d = a.getDrawable(R.styleable.ForegroundView_android_foreground);//获取前景图像
         if (d != null) {
             setForeground(d);
         }
         a.recycle();
-        setOutlineProvider(ViewOutlineProvider.BOUNDS);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setOutlineProvider(ViewOutlineProvider.BOUNDS);
+        }
     }
 
 
@@ -59,7 +61,9 @@ public class ForegroundImageView extends ImageView {
             setForeground(d);
         }
         a.recycle();
-        setOutlineProvider(ViewOutlineProvider.BOUNDS);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setOutlineProvider(ViewOutlineProvider.BOUNDS);
+        }
 
     }
 
@@ -145,7 +149,9 @@ public class ForegroundImageView extends ImageView {
     public void drawableHotspotChanged(float x, float y) {
         super.drawableHotspotChanged(x, y);
         if (foreground != null) {
-            foreground.setHotspot(x, y);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                foreground.setHotspot(x, y);
+            }
         }
     }
 }

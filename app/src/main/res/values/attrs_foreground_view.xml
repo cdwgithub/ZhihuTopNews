@@ -18,8 +18,10 @@
 <resources>
 
     <declare-styleable name="ForegroundView">
+        <!--设置该帧布局容器的前景图像-->
         <attr name="android:foreground" />
         <attr name="android:foregroundInsidePadding" />
+        <!--设置前景图像显示的位置-->
         <attr name="android:foregroundGravity" />
     </declare-styleable>
 

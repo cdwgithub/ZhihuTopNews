@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -29,9 +30,7 @@ import com.cdw.zhihutopnews.bean.ZhihuDailyItem;
 import com.cdw.zhihutopnews.config.Config;
 import com.cdw.zhihutopnews.uitls.DBUtils;
 import com.cdw.zhihutopnews.uitls.DensityUtil;
-import com.cdw.zhihutopnews.uitls.DribbbleTarget;
 import com.cdw.zhihutopnews.uitls.ObservableColorMatrix;
-import com.cdw.zhihutopnews.widget.BadgedFourThreeImageView;
 
 import java.util.ArrayList;
 
@@ -92,7 +91,8 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         if (DBUtils.getDB(context).isRead(Config.ZHIHU, zhihuDailyItem.getId(), 1))//判断是否已经阅读过
             holder.textView.setTextColor(Color.GRAY);
         else
-            holder.textView.setTextColor(Color.BLACK);
+            holder.textView.setTextColor(
+                    Config.isNight?context.getResources().getColor(R.color.text_primary_dark):context.getResources().getColor(R.color.text_light));
 
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,7 +155,7 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     }
                 }).diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .centerCrop().override(widthPx, heighPx)
-                .into(new DribbbleTarget(holder.imageView, false));
+                .into(holder.imageView);
 
 
     }
@@ -237,10 +237,10 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     class ZhihuViewHolder extends RecyclerView.ViewHolder {
         final TextView textView;
         final LinearLayout linearLayout;
-        BadgedFourThreeImageView imageView;
+        ImageView imageView;
         ZhihuViewHolder(View itemView) {
             super(itemView);
-            imageView = (BadgedFourThreeImageView) itemView.findViewById(R.id.item_image_id);
+            imageView = (ImageView) itemView.findViewById(R.id.item_image_id);
             textView = (TextView) itemView.findViewById(R.id.item_text_id);
             linearLayout = (LinearLayout) itemView.findViewById(R.id.zhihu_item_layout);
         }
