@@ -2,15 +2,29 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/main_background">
+    android:background="?attr/main_background"
+    >
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycle_zhihu"
+            android:id="@+id/recycle_zhihu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:scrollbarStyle="outsideOverlay"
+            android:clipToPadding="false"
+            android:elevation="1dp"/>
+    <com.bartoszlipinski.recyclerviewheader.RecyclerViewHeader
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        android:scrollbarStyle="outsideOverlay"
-        android:clipToPadding="false"
-        android:elevation="1dp"/>
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|top">
+        <com.cdw.zhihutopnews.widget.MainBanner
+            android:layout_width="match_parent"
+            android:layout_height="230dp"
+            android:id="@+id/recycle_header"
+            android:layout_gravity="center_horizontal|top">
+        </com.cdw.zhihutopnews.widget.MainBanner>
+    </com.bartoszlipinski.recyclerviewheader.RecyclerViewHeader>
+
 
     <ProgressBar
         android:id="@+id/prograss"
@@ -19,7 +33,6 @@
         android:layout_gravity="center"
         android:indeterminate="true"
      />
-
     <ViewStub
         android:id="@+id/stub_no_connection_text"
         android:layout_width="wrap_content"

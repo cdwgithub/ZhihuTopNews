@@ -20,12 +20,14 @@ import android.view.ViewStub;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bartoszlipinski.recyclerviewheader.RecyclerViewHeader;
 import com.cdw.zhihutopnews.R;
 import com.cdw.zhihutopnews.adapter.ZhihuAdapter;
 import com.cdw.zhihutopnews.bean.ZhihuDaily;
 import com.cdw.zhihutopnews.presenter.implePresenter.ZhihuPresenterImpl;
 import com.cdw.zhihutopnews.presenter.impleView.IZhihuFragment;
 import com.cdw.zhihutopnews.view.GridItemDividerDecoration;
+import com.cdw.zhihutopnews.widget.MainBanner;
 import com.cdw.zhihutopnews.widget.WrapContentLinearLayoutManager;
 
 import butterknife.BindView;
@@ -42,6 +44,11 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
     RecyclerView recycleZhihu;
     @BindView(R.id.prograss)
     ProgressBar progress;
+    @BindView(R.id.recycle_header)
+    MainBanner recycleHeader;
+    @BindView(R.id.header)
+    RecyclerViewHeader header;
+
 
     private ZhihuPresenterImpl zhihuPresenter;
     private ZhihuAdapter zhihuAdapter;
@@ -88,13 +95,18 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         recycleZhihu.setItemAnimator(new DefaultItemAnimator());
         recycleZhihu.setAdapter(zhihuAdapter);
         recycleZhihu.addOnScrollListener(loadingMoreListener);
+        header.attachTo(recycleZhihu, true);
 
         if (connected) {
-            loadDate();
+            loadLatestStory();
         }
     }
 
-    private void loadDate() {
+
+    /**
+     * 加载最新新闻
+     */
+    private void loadLatestStory() {
         if (zhihuAdapter.getItemCount() > 0) {
             zhihuAdapter.clearData();
         }
@@ -102,7 +114,10 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         zhihuPresenter.getLastZhihuNews();
     }
 
-    private void loadMoreDate() {
+    /**
+     * 加载更多新闻
+     */
+    private void loadMoreStory() {
         zhihuAdapter.loadingStart();
         zhihuPresenter.getTheDaily(currentLoadDate);
     }
@@ -122,7 +137,6 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-
                 if (dy > 0) //向下滚动
                 {
                     int visibleItemCount = linearLayoutManager.getChildCount();//获取可见的Item的数量
@@ -130,12 +144,11 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
                     int pastVisiblesItems = linearLayoutManager.findFirstVisibleItemPosition();
                     if (!loading && (visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                         loading = true;
-                        loadMoreDate();
+                        loadMoreStory();
                     }
                 }
             }
         };
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             connectivityCallback = new ConnectivityManager.NetworkCallback() {
@@ -146,7 +159,7 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
                         @Override
                         public void run() {
                             noConnectionText.setVisibility(View.GONE);
-                            loadDate();
+                            loadLatestStory();
                         }
                     });
                 }
@@ -173,9 +186,10 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         zhihuAdapter.addItems(zhihuDaily.getStories());
 //        if the new data is not full of the screen, need load more data
         if (!recycleZhihu.canScrollVertically(View.SCROLL_INDICATOR_BOTTOM)) {
-            loadMoreDate();
+            loadMoreStory();
         }
     }
+
 
     /**
      * 检查网络连接
@@ -241,6 +255,5 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
     }
 }

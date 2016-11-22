@@ -11,7 +11,7 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/nev_item">
+       >
         <com.cdw.zhihutopnews.widget.ParallaxScrimageView
             android:id="@+id/shot"
             android:layout_width="match_parent"
@@ -20,7 +20,7 @@
             app:maxScrimAlpha="0.4"
             app:parallaxFactor="-0.5"
             app:scrimAlpha="0"
-            app:scrimColor="@color/scrim" />
+           />
         <com.cdw.zhihutopnews.widget.TranslateYTextView
             android:id="@+id/title"
             android:layout_width="match_parent"
@@ -34,7 +34,7 @@
             app:maxScrimAlpha="0.4"
             app:parallaxFactor="-0.5"
             app:scrimAlpha="0"
-            app:scrimColor="@color/scrim" />
+           />
     </FrameLayout>
 
     <android.support.v4.widget.NestedScrollView
@@ -50,7 +50,7 @@
                 android:id="@+id/wv_zhihu"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/nev_item" />
+                 />
             <!--解决nestView无法滑倒低端-->
             <View
                 android:layout_width="match_parent"

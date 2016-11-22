@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/com.cdw.zhihutopnews"
-    xmlns:android.support.design="http://schemas.android.com/tools">
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <group android:id="@+id/g1">
         <item
             android:id="@+id/zhihuitem"
             android:checkable="true"
             android:icon="@drawable/zhihu"
             android:title="@string/zhihu"
-            android.support.design:itemTextColor="@color/nev_item"
-            app:itemIconTint="@color/nev_item"
             />
 
 

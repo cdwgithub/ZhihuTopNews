@@ -44,4 +44,6 @@ dependencies {
     compile 'com.android.support:palette-v7:24.1.1'
 
     compile 'com.squareup.okhttp3:logging-interceptor:3.2.0'
+
+    compile 'com.bartoszlipinski.recyclerviewheader:library:1.2.0'
 }

@@ -1,6 +1,7 @@
 package com.cdw.zhihutopnews.presenter.implePresenter;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.cdw.zhihutopnews.api.ApiManage;
 import com.cdw.zhihutopnews.bean.ZhihuDaily;
@@ -27,7 +28,6 @@ public class ZhihuPresenterImpl extends BasePresenterImpl implements IZhihuPrese
     private Gson gson = new Gson();
 
     public ZhihuPresenterImpl(Context context, IZhihuFragment zhihuFragment) {
-
         this.zhihuFragment = zhihuFragment;
         cacheUtil = CacheUtil.get(context);
     }
@@ -60,7 +60,7 @@ public class ZhihuPresenterImpl extends BasePresenterImpl implements IZhihuPrese
                     @Override
                     public void onNext(ZhihuDaily zhihuDaily) {
                         zhihuFragment.hidProgressDialog();
-                       // Log.d("TAG", gson.toJson(zhihuDaily));
+                        //Log.d("ZhihuPresenterImpl", gson.toJson(zhihuDaily));
                         cacheUtil.put(Config.ZHIHU, gson.toJson(zhihuDaily));
                         zhihuFragment.updateList(zhihuDaily);
                     }
@@ -99,7 +99,7 @@ public class ZhihuPresenterImpl extends BasePresenterImpl implements IZhihuPrese
                     @Override
                     public void onNext(ZhihuDaily zhihuDaily) {
                         zhihuFragment.hidProgressDialog();
-                       zhihuFragment.updateList(zhihuDaily);
+                        zhihuFragment.updateList(zhihuDaily);
                     }
                 });
         addSubscription(subscription);

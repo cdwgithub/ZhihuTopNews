@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +36,8 @@ public class MainActivity extends BaseActivity {
     NavigationView navView;
     @BindView(R.id.drawer)
     DrawerLayout drawer;
+    @BindView(R.id.sr)
+    SwipeRefreshLayout sr;
 
 
     private MenuItem currentMenuItem;
@@ -51,7 +54,11 @@ public class MainActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(navigationOnClickListener);
         getSupportActionBar().setDisplayShowTitleEnabled(false);//去掉默认显示的Title
-        addFragmentAndTitle();
+
+        initView();
+        initLisneter();
+
+
 
         if (savedInstanceState == null) {
 
@@ -76,6 +83,41 @@ public class MainActivity extends BaseActivity {
                 currentMenuItem = navView.getMenu().findItem(R.id.zhihuitem);
             }
         }
+
+
+
+
+
+
+
+
+
+    }
+
+    private void initView() {
+        addFragmentAndTitle();
+
+
+        int[][] state = new int[][]{
+                new int[]{-android.R.attr.state_checked}, // unchecked
+                new int[]{android.R.attr.state_checked}  // pressed
+        };
+        int[] color = new int[]{
+                Color.BLACK, Color.BLACK};
+        int[] iconcolor = new int[]{
+                Color.GRAY, Color.BLACK};
+        navView.setItemTextColor(new ColorStateList(state, color));
+        navView.setItemIconTintList(new ColorStateList(state, iconcolor));
+        /**
+         * 暂未实现下拉刷新功能
+         */
+        sr.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+    }
+    private void initLisneter(){
+
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -89,27 +131,21 @@ public class MainActivity extends BaseActivity {
                 return true;
             }
         });
-
-
-        int[][] state = new int[][]{
-                new int[]{-android.R.attr.state_checked}, // unchecked
-                new int[]{android.R.attr.state_checked}  // pressed
-        };
-        int[] color = new int[]{
-                Color.BLACK, Color.BLACK};
-        int[] iconcolor = new int[]{
-                Color.GRAY, Color.BLACK};
-        navView.setItemTextColor(new ColorStateList(state, color));
-        navView.setItemIconTintList(new ColorStateList(state, iconcolor));
+        sr.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                sr.setRefreshing(false);
+            }
+        });
     }
 
     /**
      * 这只白天黑夜主题模式
      */
     private void changeTheme(boolean display_model) {
-        if(display_model){
+        if (display_model) {
             setTheme(R.style.AppTheme_Night);//夜间模式
-        }else {
+        } else {
             setTheme(R.style.AppTheme_Light);//白天模式
         }
 
@@ -119,19 +155,19 @@ public class MainActivity extends BaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        menu.getItem(0).setTitle(Config.isNight? getResources().getString(R.string.display_model_light) :  getResources().getString(R.string.display_model_night) );
+        menu.getItem(0).setTitle(Config.isNight ? getResources().getString(R.string.display_model_light) : getResources().getString(R.string.display_model_night));
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.menu_display_model:
-                Config.isNight=!Config.isNight;
+                Config.isNight = !Config.isNight;
                 changeTheme(Config.isNight);
                 MainActivity.this.recreate();//重启Activity
-                item.setTitle(Config.isNight? getResources().getString(R.string.display_model_light) :  getResources().getString(R.string.display_model_night) );
+                item.setTitle(Config.isNight ? getResources().getString(R.string.display_model_light) : getResources().getString(R.string.display_model_night));
                 break;
         }
 
