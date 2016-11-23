@@ -5,6 +5,7 @@
         <item name="toolbar_background">@color/toolbar_background_light</item>
         <item name="main_background">@color/background_light</item>
         <item name="cardview_background">@color/cardview_background_light</item>
+        <item name="menu_header_background">@color/menu_header_light</item>
         <item name="text_primary">@color/text_light</item>
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
@@ -15,6 +16,7 @@
         <item name="toolbar_background">@color/toolbar_background_dark</item>
         <item name="main_background">@color/background_dark</item>
         <item name="cardview_background">@color/cardview_background_dark</item>
+        <item name="menu_header_background">@color/menu_header_dark</item>
         <item name="text_primary">@color/text_primary_dark</item>
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>

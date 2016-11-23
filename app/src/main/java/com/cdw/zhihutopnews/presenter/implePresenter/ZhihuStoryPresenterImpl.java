@@ -49,9 +49,6 @@ public class ZhihuStoryPresenterImpl extends BasePresenterImpl implements IZhihu
         addSubscription(s);
     }
 
-    @Override
-    public void getGuokrArticle(String id) {
 
-    }
 
 }

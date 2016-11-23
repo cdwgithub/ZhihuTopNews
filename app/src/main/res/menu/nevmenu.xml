@@ -7,8 +7,6 @@
             android:icon="@drawable/zhihu"
             android:title="@string/zhihu"
             />
-
-
     </group>
 
 

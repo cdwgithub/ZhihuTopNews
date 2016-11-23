@@ -1,6 +1,8 @@
 package com.cdw.zhihutopnews.fragment;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -13,6 +15,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +24,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bartoszlipinski.recyclerviewheader.RecyclerViewHeader;
+import com.cdw.zhihutopnews.MainActivity;
 import com.cdw.zhihutopnews.R;
+import com.cdw.zhihutopnews.activity.ZhihuDetailActivity;
 import com.cdw.zhihutopnews.adapter.ZhihuAdapter;
+import com.cdw.zhihutopnews.bean.TopStoryItem;
 import com.cdw.zhihutopnews.bean.ZhihuDaily;
 import com.cdw.zhihutopnews.presenter.implePresenter.ZhihuPresenterImpl;
 import com.cdw.zhihutopnews.presenter.impleView.IZhihuFragment;
@@ -54,11 +60,13 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
     private ZhihuAdapter zhihuAdapter;
     private LinearLayoutManager linearLayoutManager;
     private RecyclerView.OnScrollListener loadingMoreListener;
+    private MainBanner.OnItemClickListener mainBanneronClickListener;
     private View view = null;
     private boolean connected = true;
     private boolean loading;
     private boolean monitoringConnectivity;
     private String currentLoadDate;
+
 
 
     @Nullable
@@ -79,9 +87,11 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         initialView();
     }
 
+    /**
+     * 初始化视图
+     */
     private void initialView() {
         initialListener();
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             linearLayoutManager = new WrapContentLinearLayoutManager(getContext());
 
@@ -96,12 +106,21 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         recycleZhihu.setAdapter(zhihuAdapter);
         recycleZhihu.addOnScrollListener(loadingMoreListener);
         header.attachTo(recycleZhihu, true);
+       recycleHeader.setOnItemClickListener(mainBanneronClickListener);
+
 
         if (connected) {
             loadLatestStory();
         }
     }
 
+    /**
+     * 初始化数据
+     */
+    private void initialDate() {
+        zhihuPresenter = new ZhihuPresenterImpl(getContext(), this);
+        zhihuAdapter = new ZhihuAdapter(getContext());
+    }
 
     /**
      * 加载最新新闻
@@ -112,6 +131,8 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         }
         currentLoadDate = "0";
         zhihuPresenter.getLastZhihuNews();
+
+
     }
 
     /**
@@ -122,10 +143,7 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         zhihuPresenter.getTheDaily(currentLoadDate);
     }
 
-    private void initialDate() {
-        zhihuPresenter = new ZhihuPresenterImpl(getContext(), this);
-        zhihuAdapter = new ZhihuAdapter(getContext());
-    }
+
 
     private void initialListener() {
         loadingMoreListener = new RecyclerView.OnScrollListener() {
@@ -133,7 +151,6 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
             }
-
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -149,7 +166,6 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
                 }
             }
         };
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             connectivityCallback = new ConnectivityManager.NetworkCallback() {
                 @Override
@@ -163,7 +179,6 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
                         }
                     });
                 }
-
                 @Override
                 public void onLost(Network network) {
                     connected = false;
@@ -171,6 +186,17 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
             };
 
         }
+
+        mainBanneronClickListener=new MainBanner.OnItemClickListener() {
+            @Override
+            public void onClick(View v, TopStoryItem topStoryItem) {
+                Intent intent = new Intent(getActivity(), ZhihuDetailActivity.class);
+                intent.putExtra("id", topStoryItem.getId());
+                intent.putExtra("title", topStoryItem.getTitle());
+                intent.putExtra("image",topStoryItem.getImage());
+                getActivity().startActivity(intent);
+            }
+        };
 
 
     }
@@ -184,13 +210,18 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         }
         currentLoadDate = zhihuDaily.getDate();
         zhihuAdapter.addItems(zhihuDaily.getStories());
-//        if the new data is not full of the screen, need load more data
+        // if the new data is not full of the screen, need load more data
         if (!recycleZhihu.canScrollVertically(View.SCROLL_INDICATOR_BOTTOM)) {
             loadMoreStory();
         }
     }
 
+    @Override
+    public void getTopStory(ZhihuDaily zhihuDaily) {
+        recycleHeader.showTopStory(zhihuDaily);
+    }
 
+    private ConnectivityManager.NetworkCallback connectivityCallback;
     /**
      * 检查网络连接
      *
@@ -219,7 +250,7 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
 
     }
 
-    private ConnectivityManager.NetworkCallback connectivityCallback;
+
 
     @Override
     public void showProgressDialog() {
@@ -251,6 +282,8 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
 
         }
     }
+
+
 
     @Override
     public void onDestroy() {

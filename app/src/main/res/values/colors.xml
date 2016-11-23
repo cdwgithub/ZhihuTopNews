@@ -6,13 +6,14 @@
     <color name="cardview_background_light">#fafafa</color>
     <color name="text_light">#000000</color>
     <color name="text_secondary_light">#b3ffffff</color> <!-- 70% -->
+    <color name="menu_header_light">@android:color/holo_blue_dark</color>
     <!--Night Color-->
     <color name="toolbar_background_dark">#ff292929</color>
     <color name="background_dark">#ff333333</color>
     <color name="cardview_background_dark">#ff444444</color>
     <color name="text_primary_dark">#fafafa</color> <!-- 87% -->
     <color name="text_secondary_dark">#40808080</color> <!-- 54% -->
-
+    <color name="menu_header_dark">#ff333333</color>
 
 
     <!-- Others-->

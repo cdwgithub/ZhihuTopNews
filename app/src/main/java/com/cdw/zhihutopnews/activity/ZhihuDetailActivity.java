@@ -3,17 +3,12 @@ package com.cdw.zhihutopnews.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.NestedScrollView;
-import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -24,18 +19,13 @@ import android.webkit.WebView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.cdw.zhihutopnews.R;
 import com.cdw.zhihutopnews.bean.ZhihuStory;
 import com.cdw.zhihutopnews.config.Config;
 import com.cdw.zhihutopnews.presenter.IZhihuStoryPresenter;
 import com.cdw.zhihutopnews.presenter.implePresenter.ZhihuStoryPresenterImpl;
 import com.cdw.zhihutopnews.presenter.impleView.IZhihuStory;
-import com.cdw.zhihutopnews.uitls.ColorUtils;
 import com.cdw.zhihutopnews.uitls.DensityUtil;
-import com.cdw.zhihutopnews.uitls.GlideUtils;
 import com.cdw.zhihutopnews.uitls.WebUtil;
 import com.cdw.zhihutopnews.widget.ParallaxScrimageView;
 import com.cdw.zhihutopnews.widget.TranslateYTextView;
@@ -44,12 +34,11 @@ import java.lang.reflect.InvocationTargetException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
     @BindView(R.id.shot)
-    ParallaxScrimageView parallaxScrimageView;
+    ParallaxScrimageView parallaxScrimageView;//自定义ImageView，显示新闻标题图片
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.wv_zhihu)
@@ -60,17 +49,11 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
     TranslateYTextView translateYTextView;
 
 
-    private int[] DevicesInfo;
-    private int width;
-    private int height;
-    private String id;
-    private String title;
-    private String url;
-    private String imageUrl;
-    private boolean isEmpty;
-    private String body;
-    private String[] scc;
-    private boolean isToolbarenable = true;
+    private int width;//图片的宽
+    private int height;//图片的高
+    private String id;//新闻ID
+    private String title;//新闻标题
+    private boolean isToolbarenable = true;//toolbar是否能点击
     private IZhihuStoryPresenter iZhihuStoryPresenter;
     private NestedScrollView.OnScrollChangeListener scrollListener;
 
@@ -81,13 +64,12 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
         changeTheme(Config.isNight);
         setContentView(R.layout.activity_zhihu_detail);
         ButterKnife.bind(this);
-        DevicesInfo = DensityUtil.getDeviceInfo(this);//获取屏幕分辨率信息
-        width = DevicesInfo[0];
+        int[] devicesInfo = DensityUtil.getDeviceInfo(this);
+        width = devicesInfo[0];
         height = 3 * width / 4;
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
 
         initlistenr();
         initData();
@@ -96,22 +78,23 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
 
     }
+
     /**
-     * 这只白天黑夜主题模式
+     * 切换白天黑夜主题模式
      */
     private void changeTheme(boolean display_model) {
-        if(display_model){
+        if (display_model) {
             setTheme(R.style.AppTheme_Night);//夜间模式
-        }else {
+        } else {
             setTheme(R.style.AppTheme_Light);//白天模式
         }
 
     }
+
     private void initlistenr() {
         scrollListener = new NestedScrollView.OnScrollChangeListener() {
             @Override
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-
                 if (oldScrollY < parallaxScrimageView.getHeight()) {
                     parallaxScrimageView.setOffset(-oldScrollY);
                     translateYTextView.setOffset(-oldScrollY);
@@ -120,11 +103,11 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
                     float alpha = 1 - (float) scrollY / (toolbar.getHeight() * 2);
                     toolbar.setAlpha(alpha);//根据向下滑动的距离逐渐隐藏toolbar
                     if (alpha <= 0.0f) {
-                        isToolbarenable = false;
+                        isToolbarenable = false;//完全透明是toolbar不可以点击
                     }
                 } else if (scrollY < oldScrollY && (oldScrollY - scrollY) > 10) {
                     toolbar.setAlpha(1);//toolbar透明度为1，即正常显示toolbar
-                    isToolbarenable = true;
+                    isToolbarenable = true;//toolbar可以点击
                 }
 
 
@@ -136,7 +119,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
             @Override
             public void onClick(View v) {
                 if (isToolbarenable) {
-                    expandImageAndFinish();
+                    expandImageAndFinish();//返回主页
                 }
             }
         });
@@ -149,20 +132,24 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
     }
 
     private void initView() {
-        translateYTextView.setText(title);
+        translateYTextView.setText(title);//显示新闻标题
+
         WebSettings settings = wvZhihu.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        settings.setLoadWithOverviewMode(true);
-        settings.setBuiltInZoomControls(true);
-        settings.setDomStorageEnabled(true);
+        settings.setJavaScriptEnabled(true);//支持js
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);//如果cache中不存在，从网络中获取！
+        settings.setLoadWithOverviewMode(true);//缩放至屏幕大小
+        settings.setBuiltInZoomControls(true);////设置支持缩放
+        settings.setDomStorageEnabled(true);//如果需要存储一些简单的用key/value对即可解决的数据，DOM Storage是非常完美的方案
         settings.setDatabaseEnabled(true);
-        settings.setAppCachePath(getCacheDir().getAbsolutePath() + "/webViewCache");
+        settings.setAppCachePath(getCacheDir().getAbsolutePath() + "/webViewCache");//缓存路径
         settings.setAppCacheEnabled(true);
-        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-        wvZhihu.setWebChromeClient(new WebChromeClient());
+        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);//把所有内容放到WebView组件等宽的一列中,避免出现横向滚动条
+        wvZhihu.setWebChromeClient(new WebChromeClient());//辅助WebView处理Javascript的对话框，网站图标，网站title，加载进度等
     }
 
+    /**
+     * 页面返回主页时的动画
+     */
     private void expandImageAndFinish() {
         if (parallaxScrimageView.getOffset() != 0f) {
             Animator expandImage = ObjectAnimator.ofFloat(parallaxScrimageView, ParallaxScrimageView.OFFSET,
@@ -191,10 +178,10 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
     }
 
     private void initData() {
-
         id = getIntent().getStringExtra("id");//获取新闻id
         title = getIntent().getStringExtra("title");//获取新闻标题
-        imageUrl = getIntent().getStringExtra("image");//获取新闻首张图片
+        //String imageUrl = getIntent().getStringExtra("image");
+
         iZhihuStoryPresenter = new ZhihuStoryPresenterImpl(this);
         nest.setOnScrollChangeListener(scrollListener);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -250,7 +237,7 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
     @Override
     protected void onDestroy() {
 
-        //webview内存泄露
+        //防止webview内存泄露
         if (wvZhihu != null) {
             ((ViewGroup) wvZhihu.getParent()).removeView(wvZhihu);
             wvZhihu.destroy();
@@ -281,14 +268,15 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
     @Override
     public void showZhihuStory(ZhihuStory zhihuStory) {
         Glide.with(this)
-                .load(zhihuStory.getImage()).centerCrop()
-                .listener(loadListener).override(width, height)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .load(zhihuStory.getImage())
+                .centerCrop()
+                .override(width, height)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)//缓存原始图片
                 .into(parallaxScrimageView);
-        url = zhihuStory.getShareUrl();
-        isEmpty = TextUtils.isEmpty(zhihuStory.getBody());
-        body = zhihuStory.getBody();
-        scc = zhihuStory.getCss();
+        String url = zhihuStory.getShareUrl();
+        boolean isEmpty = TextUtils.isEmpty(zhihuStory.getBody());
+        String body = zhihuStory.getBody();
+        String[] scc = zhihuStory.getCss();
         if (isEmpty) {
             wvZhihu.loadUrl(url);
         } else {
@@ -298,63 +286,6 @@ public class ZhihuDetailActivity extends BaseActivity implements IZhihuStory {
 
     }
 
-    private RequestListener loadListener = new RequestListener<String, GlideDrawable>() {
-
-        @Override
-        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-            return false;
-        }
-
-        @Override
-        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-            final Bitmap bitmap = GlideUtils.getBitmap(resource);
-            final int twentyFourDip = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                    24, ZhihuDetailActivity.this.getResources().getDisplayMetrics());
-            Palette.from(bitmap)
-                    .maximumColorCount(3)
-                    .clearFilters() /* by default palette ignore certain hues
-                        (e.g. pure black/white) but we don't want this. */
-                    .setRegion(0, 0, bitmap.getWidth() - 1, twentyFourDip) /* - 1 to work around
-                        https://code.google.com/p/android/issues/detail?id=191013 */
-                    .generate(new Palette.PaletteAsyncListener() {
-                        @Override
-                        public void onGenerated(Palette palette) {
-                            boolean isDark;
-                            @ColorUtils.Lightness int lightness = ColorUtils.isDark(palette);
-                            if (lightness == ColorUtils.LIGHTNESS_UNKNOWN) {
-                                isDark = ColorUtils.isDark(bitmap, bitmap.getWidth() / 2, 0);
-                            } else {
-                                isDark = lightness == ColorUtils.IS_DARK;
-                            }
-
-                            // color the status bar. Set a complementary dark color on L,
-                            // light or dark color on M (with matching status bar icons)
 
 
-                        }
-                    });
-
-
-            Palette.from(bitmap)
-                    .clearFilters()
-                    .generate(new Palette.PaletteAsyncListener() {
-                        @Override
-                        public void onGenerated(Palette palette) {
-
-                            // slightly more opaque ripple on the pinned image to compensate
-                            // for the scrim
-
-                        }
-                    });
-
-            // TODO should keep the background if the image contains transparency?!
-            parallaxScrimageView.setBackground(null);
-            return false;
-        }
-    };
-
-    @OnClick(R.id.shot)
-    public void onClick() {
-        nest.smoothScrollTo(0, 0);
-    }
 }

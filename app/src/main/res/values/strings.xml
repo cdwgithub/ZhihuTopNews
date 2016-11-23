@@ -11,4 +11,7 @@
 
     <string name="transition_shot_background" translatable="false">shot_background</string>
     <string name="transition_shot" translatable="false">shot</string>
+    <string name="download_offline">离线下载</string>
+    <string name="mycollection">我的收藏</string>
+    <string name="please_login">请登录</string>
 </resources>

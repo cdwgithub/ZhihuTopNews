@@ -1,5 +1,7 @@
 package com.cdw.zhihutopnews.bean;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by CDW on 2016/11/3.
  */
@@ -12,11 +14,13 @@ public class TopStoryItem {
      * ga_prefix : 112117
      * title : 知乎好问题 · 有氧运动要超过一定时间才有减脂作用吗？
      */
-
+    @SerializedName("image")
     private String image;
+    @SerializedName("type")
     private int type;
-    private int id;
-    private String ga_prefix;
+    @SerializedName("id")
+    private String id;
+    @SerializedName("title")
     private String title;
 
     public void setImage(String image) {
@@ -27,13 +31,10 @@ public class TopStoryItem {
         this.type = type;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public void setGa_prefix(String ga_prefix) {
-        this.ga_prefix = ga_prefix;
-    }
 
     public void setTitle(String title) {
         this.title = title;
@@ -47,26 +48,14 @@ public class TopStoryItem {
         return type;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public String getGa_prefix() {
-        return ga_prefix;
-    }
 
     public String getTitle() {
         return title;
     }
-
-   /*@SerializedName("image")
-    private String[] image;
-    @SerializedName("type")
-    private int type;
-    @SerializedName("id")
-    private String id;
-    @SerializedName("title")
-    private String title;*/
 
 
 }

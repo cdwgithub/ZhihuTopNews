@@ -1,6 +1,11 @@
 package com.cdw.zhihutopnews.widget;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.ColorMatrixColorFilter;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -9,6 +14,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,8 +28,7 @@ import com.bumptech.glide.request.target.Target;
 import com.cdw.zhihutopnews.R;
 import com.cdw.zhihutopnews.bean.TopStoryItem;
 import com.cdw.zhihutopnews.bean.ZhihuDaily;
-import com.cdw.zhihutopnews.presenter.implePresenter.TopStoryPresenterImpl;
-import com.cdw.zhihutopnews.presenter.impleView.ITopStories;
+import com.cdw.zhihutopnews.uitls.ObservableColorMatrix;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,25 +37,23 @@ import java.util.List;
  * Created by CDW on 2016/11/20.
  */
 
-public class MainBanner extends FrameLayout implements ITopStories, View.OnClickListener {
-    // @BindView(R.id.mainbanner_vp)
-    ViewPager mainbannerVp;
-    // @BindView(R.id.mainbanner_ll_dot)
-    LinearLayout mainbannerLlDot;
-    // @BindView(R.id.iv_title)
-    ImageView ivTitle;
-    //  @BindView(R.id.tv_title)
-    TextView tvTitle;
+public class MainBanner extends FrameLayout implements View.OnClickListener {
+
+    private ViewPager mainbannerVp;
+    private LinearLayout mainbannerLlDot;
+    private ImageView ivTitle;
+    private TextView tvTitle;
 
 
     private Context context;
-    private TopStoryPresenterImpl topStoryPresenter;
     private ArrayList<TopStoryItem> topStoryList = new ArrayList<>();
     private List<View> views;
     private List<ImageView> iv_dots;
     private boolean isAutoPlay;
     private int currentItem;
     private Handler handler = new Handler();
+    private OnItemClickListener itemClickListener;
+
     public MainBanner(Context context) {
         this(context, null);
     }
@@ -62,7 +65,6 @@ public class MainBanner extends FrameLayout implements ITopStories, View.OnClick
     public MainBanner(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.context = context;
-        initData();
         initView();
     }
 
@@ -75,6 +77,10 @@ public class MainBanner extends FrameLayout implements ITopStories, View.OnClick
         mainbannerLlDot.removeAllViews();
     }
 
+    /**
+     * 加载图片
+     * @param picUrl
+     */
     void loadPic(String picUrl) {
         Glide.with(context)
                 .load(picUrl)
@@ -86,67 +92,54 @@ public class MainBanner extends FrameLayout implements ITopStories, View.OnClick
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        /*if (!topStoryList.hasFadedIn) {
 
-                            holder.imageView.setHasTransientState(true);//告诉系统这个 View 应该尽可能的被保留，
 
-                            // 直到setHasTransientState(false)被呼叫
-                            final ObservableColorMatrix cm = new ObservableColorMatrix();
-                            final ObjectAnimator animator = ObjectAnimator.ofFloat(cm, ObservableColorMatrix.SATURATION, 0f, 1f);
-                            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                                @Override
-                                public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                    holder.imageView.setColorFilter(new ColorMatrixColorFilter(cm));
-                                }
-                            });
-                            animator.setDuration(2000L);
-                            animator.setInterpolator(new AccelerateInterpolator());
-                            animator.addListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    super.onAnimationEnd(animation);
-                                    holder.imageView.clearColorFilter();
+                        ivTitle.setHasTransientState(true);//告诉系统这个 View 应该尽可能的被保留，直到setHasTransientState(false)被呼叫
+                        final ObservableColorMatrix cm = new ObservableColorMatrix();
+                        final ObjectAnimator animator = ObjectAnimator.ofFloat(cm, ObservableColorMatrix.SATURATION, 0f, 1f);
+                        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                ivTitle.setColorFilter(new ColorMatrixColorFilter(cm));
+                            }
+                        });
+                        animator.setDuration(2000L);
+                        animator.setInterpolator(new AccelerateInterpolator());
+                        animator.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                                ivTitle.clearColorFilter();
+                                ivTitle.setHasTransientState(false);
 
-                                    holder.imageView.setHasTransientState(false);
+                                animator.start();
 
-                                    animator.start();
-                                    zhihuDailyItem.hasFadedIn = true;
 
-                                }
-                            });
-                        }*/
+                            }
+                        });
+
 
                         return false;
                     }
                 }).diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                //.centerCrop().override(widthPx, heighPx)
                 .into(ivTitle);
     }
 
 
-    private void initData() {
-        topStoryPresenter = new TopStoryPresenterImpl(getContext(), this);
-        topStoryPresenter.getTopStory();
-    }
-
     class MyPagerAdapter extends PagerAdapter {
-
         @Override
         public int getCount() {
             return views.size();
         }
-
         @Override
         public boolean isViewFromObject(View arg0, Object arg1) {
             return arg0 == arg1;
         }
-
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             container.addView(views.get(position));
             return views.get(position);
         }
-
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((View) object);
@@ -154,12 +147,6 @@ public class MainBanner extends FrameLayout implements ITopStories, View.OnClick
 
     }
 
-    @Override
-    public void showError(String error) {
-
-    }
-
-    @Override
     public void showTopStory(ZhihuDaily zhihuDaily) {
         topStoryList = zhihuDaily.getTopstories();
         int len = topStoryList.size();
@@ -170,12 +157,11 @@ public class MainBanner extends FrameLayout implements ITopStories, View.OnClick
                     LinearLayout.LayoutParams.WRAP_CONTENT);
             params.leftMargin = 5;
             params.rightMargin = 5;
-            params.gravity=Gravity.CENTER;
+            params.gravity = Gravity.CENTER;
             mainbannerLlDot.addView(iv_dot, params);
             iv_dots.add(iv_dot);
 
         }
-
         for (int i = 0; i <= len + 1; i++) {
             View fm = LayoutInflater.from(context).inflate(
                     R.layout.mainbanner_content_layout, null);
@@ -261,6 +247,17 @@ public class MainBanner extends FrameLayout implements ITopStories, View.OnClick
 
     @Override
     public void onClick(View view) {
+        if (itemClickListener != null) {
+            TopStoryItem topStoryItem = topStoryList.get(mainbannerVp.getCurrentItem() - 1);
+            itemClickListener.onClick(view, topStoryItem);
+        }
+    }
 
+    public void setOnItemClickListener(OnItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
+    }
+
+    public interface OnItemClickListener {
+       void onClick(View v, TopStoryItem topStoryItem);
     }
 }

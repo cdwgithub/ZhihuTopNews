@@ -25,11 +25,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity {
-
-
-    SimpleArrayMap<Integer, String> titleArryMap = new SimpleArrayMap<>();
-
-
+    SimpleArrayMap<Integer, String> titleArrayMap = new SimpleArrayMap<>();
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.nav_view)
@@ -38,8 +34,6 @@ public class MainActivity extends BaseActivity {
     DrawerLayout drawer;
     @BindView(R.id.sr)
     SwipeRefreshLayout sr;
-
-
     private MenuItem currentMenuItem;
     private Fragment currentFragment;
     private long exitTime = 0;
@@ -53,15 +47,10 @@ public class MainActivity extends BaseActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(navigationOnClickListener);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);//去掉默认显示的Title
-
+        //getSupportActionBar().setDisplayShowTitleEnabled(false);//去掉默认显示的Title
         initView();
         initLisneter();
-
-
-
         if (savedInstanceState == null) {
-
             if (currentMenuItem == null) {
                 currentMenuItem = navView.getMenu().findItem(R.id.zhihuitem);//默认选择知乎界面
             }
@@ -84,20 +73,10 @@ public class MainActivity extends BaseActivity {
             }
         }
 
-
-
-
-
-
-
-
-
     }
 
     private void initView() {
         addFragmentAndTitle();
-
-
         int[][] state = new int[][]{
                 new int[]{-android.R.attr.state_checked}, // unchecked
                 new int[]{android.R.attr.state_checked}  // pressed
@@ -117,7 +96,6 @@ public class MainActivity extends BaseActivity {
                 android.R.color.holo_red_light);
     }
     private void initLisneter(){
-
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -140,7 +118,7 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * 这只白天黑夜主题模式
+     * 切换白天黑夜主题模式
      */
     private void changeTheme(boolean display_model) {
         if (display_model) {
@@ -161,7 +139,6 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.menu_display_model:
                 Config.isNight = !Config.isNight;
@@ -170,12 +147,11 @@ public class MainActivity extends BaseActivity {
                 item.setTitle(Config.isNight ? getResources().getString(R.string.display_model_light) : getResources().getString(R.string.display_model_night));
                 break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     /**
-     * 切换不同的Fragment
+     * 切换不同的Fragment，当前只有一个Fragment，后续扩展
      *
      * @param fragment
      */
@@ -187,7 +163,7 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * 根据ID加载不同的Fragment
+     * 根据ID加载不同的Fragment，当前只有一个Fragment，后续扩展
      *
      * @param itemId
      * @return
@@ -204,7 +180,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void addFragmentAndTitle() {
-        titleArryMap.put(R.id.zhihuitem, getResources().getString(R.string.zhihu));
+        titleArrayMap.put(R.id.zhihuitem, getResources().getString(R.string.zhihu));
 
     }
 
@@ -216,10 +192,9 @@ public class MainActivity extends BaseActivity {
     };
 
 
-    //    when recycle view scroll bottom,need loading more date and show the more view.
+    //当Recycle滑动到底部时，加载更多新闻
     public interface LoadingMore {
         void loadingStart();
-
         void loadingFinish();
     }
 

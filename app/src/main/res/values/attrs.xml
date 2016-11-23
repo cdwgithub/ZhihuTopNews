@@ -4,6 +4,7 @@
     <attr name="main_background" format="reference|color"/>
     <attr name="cardview_background" format="reference|color"/>
     <attr name="text_primary" format="reference|color"/>
+    <attr name="menu_header_background" format="reference|color"/>
     <attr name="text_secondary" format="reference|color"/>
 
 

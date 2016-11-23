@@ -1,7 +1,6 @@
 package com.cdw.zhihutopnews.presenter.implePresenter;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.cdw.zhihutopnews.api.ApiManage;
 import com.cdw.zhihutopnews.bean.ZhihuDaily;
@@ -63,6 +62,7 @@ public class ZhihuPresenterImpl extends BasePresenterImpl implements IZhihuPrese
                         //Log.d("ZhihuPresenterImpl", gson.toJson(zhihuDaily));
                         cacheUtil.put(Config.ZHIHU, gson.toJson(zhihuDaily));
                         zhihuFragment.updateList(zhihuDaily);
+                        zhihuFragment.getTopStory(zhihuDaily);
                     }
                 });
         addSubscription(subscription);

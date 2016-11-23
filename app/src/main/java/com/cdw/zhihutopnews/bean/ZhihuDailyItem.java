@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class ZhihuDailyItem {
 
-   @SerializedName("images")
+    @SerializedName("images")
     private String[] images;
     @SerializedName("type")
     private int type;
@@ -40,7 +40,7 @@ public class ZhihuDailyItem {
         this.date = date;
     }
 
-    public String[]  getImages() {
+    public String[] getImages() {
         return images;
     }
 
@@ -59,12 +59,6 @@ public class ZhihuDailyItem {
     public String getDate() {
         return date;
     }
-
-
-
-
-
-
 
 
 }
