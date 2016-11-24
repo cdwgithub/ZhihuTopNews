@@ -28,3 +28,4 @@
 后续还会完善更新。。。。
 
 
+![image](https://github.com/cdwgithub/ZhihuTopNews/blob/master/screenshots/1.png)
