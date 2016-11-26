@@ -1,8 +1,13 @@
 package com.cdw.zhihutopnews;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -15,9 +20,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.cdw.zhihutopnews.activity.BaseActivity;
+
 import com.cdw.zhihutopnews.config.Config;
 import com.cdw.zhihutopnews.fragment.ZhihuFragment;
 
@@ -36,6 +43,7 @@ public class MainActivity extends BaseActivity {
     SwipeRefreshLayout sr;
     private MenuItem currentMenuItem;
     private Fragment currentFragment;
+    private ZhihuFragment zhihuFragment;
     private long exitTime = 0;
 
 
@@ -53,6 +61,7 @@ public class MainActivity extends BaseActivity {
         if (savedInstanceState == null) {
             if (currentMenuItem == null) {
                 currentMenuItem = navView.getMenu().findItem(R.id.zhihuitem);//默认选择知乎界面
+
             }
             if (currentMenuItem != null) {
                 currentMenuItem.setChecked(true);
@@ -95,7 +104,8 @@ public class MainActivity extends BaseActivity {
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
     }
-    private void initLisneter(){
+
+    private void initLisneter() {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -118,7 +128,8 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * 切换白天黑夜主题模式
+     * 切换白天黑夜主题模式,此种方式需要重启Activity
+     * MainActivity.this.recreate();
      */
     private void changeTheme(boolean display_model) {
         if (display_model) {
@@ -127,6 +138,12 @@ public class MainActivity extends BaseActivity {
             setTheme(R.style.AppTheme_Light);//白天模式
         }
 
+    }
+
+    private void refreshUI() {
+        toolbar.setBackgroundColor(getResources().getColor(Config.isNight ? R.color.toolbar_background_dark : R.color.toolbar_background_light));
+        navView.setBackgroundColor(getResources().getColor(Config.isNight ? R.color.background_dark : R.color.background_light));
+        ((ZhihuFragment) currentFragment).refreshUI();
     }
 
 
@@ -142,9 +159,10 @@ public class MainActivity extends BaseActivity {
         switch (item.getItemId()) {
             case R.id.menu_display_model:
                 Config.isNight = !Config.isNight;
-                changeTheme(Config.isNight);
-                MainActivity.this.recreate();//重启Activity
+                showAnimation();
+                refreshUI();
                 item.setTitle(Config.isNight ? getResources().getString(R.string.display_model_light) : getResources().getString(R.string.display_model_night));
+
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -195,6 +213,7 @@ public class MainActivity extends BaseActivity {
     //当Recycle滑动到底部时，加载更多新闻
     public interface LoadingMore {
         void loadingStart();
+
         void loadingFinish();
     }
 
@@ -211,4 +230,52 @@ public class MainActivity extends BaseActivity {
             }
         }
     }
+
+
+    /**
+     * 展示一个切换动画
+     */
+    private void showAnimation() {
+        final View decorView = getWindow().getDecorView();
+        Bitmap cacheBitmap = getCacheBitmapFromView(decorView);
+        if (decorView instanceof ViewGroup && cacheBitmap != null) {
+            final View view = new View(this);
+            view.setBackgroundDrawable(new BitmapDrawable(getResources(), cacheBitmap));
+            ViewGroup.LayoutParams layoutParam = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            ((ViewGroup) decorView).addView(view, layoutParam);
+            ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
+            objectAnimator.setDuration(300);
+            objectAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    ((ViewGroup) decorView).removeView(view);
+                }
+            });
+            objectAnimator.start();
+        }
+    }
+
+    /**
+     * 获取一个 View 的缓存视图
+     *
+     * @param view
+     * @return
+     */
+    private Bitmap getCacheBitmapFromView(View view) {
+        final boolean drawingCacheEnabled = true;
+        view.setDrawingCacheEnabled(drawingCacheEnabled);
+        view.buildDrawingCache(drawingCacheEnabled);
+        final Bitmap drawingCache = view.getDrawingCache();
+        Bitmap bitmap;
+        if (drawingCache != null) {
+            bitmap = Bitmap.createBitmap(drawingCache);
+            view.setDrawingCacheEnabled(false);
+        } else {
+            bitmap = null;
+        }
+        return bitmap;
+    }
+
 }

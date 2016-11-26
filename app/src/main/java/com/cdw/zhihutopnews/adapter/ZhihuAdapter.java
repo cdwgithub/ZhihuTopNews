@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,12 +39,12 @@ import java.util.ArrayList;
  * Created by CDW on 2016/11/5.
  */
 
-public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements MainActivity.LoadingMore{
+public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements MainActivity.LoadingMore {
     private static final int TYPE_LOADING_MORE = -1;
     private static final int NOMAL_ITEM = 1;
     private boolean showLoadingMore;
     private float width;
-    private  int widthPx;
+    private int widthPx;
     private int heighPx;
     private ArrayList<ZhihuDailyItem> zhihuDailyItems = new ArrayList<>();
     private Context context;
@@ -55,6 +56,7 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         widthPx = DensityUtil.dip2px(this.context, width);
         heighPx = widthPx * 3 / 4;
     }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
@@ -81,9 +83,11 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 break;
         }
     }
+
     private void bindLoadingViewHold(LoadingMoreHolder holder, int position) {
         holder.progressBar.setVisibility(showLoadingMore ? View.VISIBLE : View.INVISIBLE);
     }
+
     private void bindViewHolderNormal(final ZhihuViewHolder holder, final int position) {
 
         final ZhihuDailyItem zhihuDailyItem = zhihuDailyItems.get(holder.getAdapterPosition());
@@ -92,12 +96,12 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             holder.textView.setTextColor(Color.GRAY);
         else
             holder.textView.setTextColor(
-                    Config.isNight?context.getResources().getColor(R.color.text_primary_dark):context.getResources().getColor(R.color.text_light));
-
+                    Config.isNight ? context.getResources().getColor(R.color.text_primary_dark) : context.getResources().getColor(R.color.text_light));
+        holder.cardView.setBackgroundColor(Config.isNight ? context.getResources().getColor(R.color.cardview_background_dark) : context.getResources().getColor(R.color.cardview_background_light));
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                goDescribeActivity(holder,zhihuDailyItem);
+                goDescribeActivity(holder, zhihuDailyItem);
             }
         });
         holder.textView.setText(zhihuDailyItem.getTitle());
@@ -106,7 +110,7 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        goDescribeActivity(holder,zhihuDailyItem);
+                        goDescribeActivity(holder, zhihuDailyItem);
                     }
                 });
 
@@ -123,7 +127,7 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                         if (!zhihuDailyItem.hasFadedIn) {
 
-                                holder.imageView.setHasTransientState(true);//告诉系统这个 View 应该尽可能的被保留，
+                            holder.imageView.setHasTransientState(true);//告诉系统这个 View 应该尽可能的被保留，
 
                             // 直到setHasTransientState(false)被呼叫
                             final ObservableColorMatrix cm = new ObservableColorMatrix();
@@ -142,7 +146,7 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                                     super.onAnimationEnd(animation);
                                     holder.imageView.clearColorFilter();
 
-                                        holder.imageView.setHasTransientState(false);
+                                    holder.imageView.setHasTransientState(false);
 
                                     animator.start();
                                     zhihuDailyItem.hasFadedIn = true;
@@ -160,17 +164,18 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     }
 
-    private void goDescribeActivity(ZhihuViewHolder holder,ZhihuDailyItem zhihuDailyItem){
+    private void goDescribeActivity(ZhihuViewHolder holder, ZhihuDailyItem zhihuDailyItem) {
 
         DBUtils.getDB(context).insertHasRead(Config.ZHIHU, zhihuDailyItem.getId(), 1);
         holder.textView.setTextColor(Color.GRAY);
         Intent intent = new Intent(context, ZhihuDetailActivity.class);
         intent.putExtra("id", zhihuDailyItem.getId());
         intent.putExtra("title", zhihuDailyItem.getTitle());
-        intent.putExtra("image",imageUrl);
+        intent.putExtra("image", imageUrl);
         context.startActivity(intent);
 
     }
+
     @Override
     public int getItemCount() {
         return zhihuDailyItems.size();
@@ -184,13 +189,16 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
         return TYPE_LOADING_MORE;
     }
+
     private int getDataItemCount() {
 
         return zhihuDailyItems.size();
     }
+
     private int getLoadingMoreItemPosition() {
         return showLoadingMore ? getItemCount() - 1 : RecyclerView.NO_POSITION;
     }
+
     // List.add() 的含义就是：你往这个List 中添加对象，它就把自己当作一个对象，
     // 你往这个List中添加容器，它就把自己当成一个容器。
     //List.addAll()方法，就是规定了，自己的这个List 就是容器，往里面增加的List 实例，
@@ -214,6 +222,7 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         showLoadingMore = false;
         notifyItemRemoved(loadingPos);
     }
+
     public void clearData() {
         zhihuDailyItems.clear();
         notifyDataSetChanged();
@@ -237,12 +246,15 @@ public class ZhihuAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     class ZhihuViewHolder extends RecyclerView.ViewHolder {
         final TextView textView;
         final LinearLayout linearLayout;
-        ImageView imageView;
+        final ImageView imageView;
+        final CardView cardView;
+
         ZhihuViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.item_image_id);
             textView = (TextView) itemView.findViewById(R.id.item_text_id);
             linearLayout = (LinearLayout) itemView.findViewById(R.id.zhihu_item_layout);
+            cardView = (CardView) itemView.findViewById(R.id.zhihu_item_carview);
         }
     }
 

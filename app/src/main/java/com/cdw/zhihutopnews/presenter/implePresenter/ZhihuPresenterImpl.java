@@ -1,6 +1,7 @@
 package com.cdw.zhihutopnews.presenter.implePresenter;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.cdw.zhihutopnews.api.ApiManage;
 import com.cdw.zhihutopnews.bean.ZhihuDaily;
@@ -34,6 +35,7 @@ public class ZhihuPresenterImpl extends BasePresenterImpl implements IZhihuPrese
 
     @Override
     public void getLastZhihuNews() {
+        Log.d("ZhihuPresenterImpl", "getLastZhihuNews()");
         zhihuFragment.showProgressDialog();
         Subscription subscription = ApiManage.getInstence().getZhihuApiService().getLastDaily()
                 .map(new Func1<ZhihuDaily, ZhihuDaily>() {
@@ -107,9 +109,11 @@ public class ZhihuPresenterImpl extends BasePresenterImpl implements IZhihuPrese
 
     @Override
     public void getLastFromCache() {
+        Log.d("ZhihuPresenterImpl", "getLastFromCache()");
         if (cacheUtil.getAsJSONObject(Config.ZHIHU) != null) {
             ZhihuDaily zhihuDaily = gson.fromJson(cacheUtil.getAsJSONObject(Config.ZHIHU).toString(), ZhihuDaily.class);
             zhihuFragment.updateList(zhihuDaily);
+            zhihuFragment.getTopStory(zhihuDaily);
         }
     }
 

@@ -1,6 +1,5 @@
 package com.cdw.zhihutopnews.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -15,21 +14,21 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bartoszlipinski.recyclerviewheader.RecyclerViewHeader;
-import com.cdw.zhihutopnews.MainActivity;
 import com.cdw.zhihutopnews.R;
 import com.cdw.zhihutopnews.activity.ZhihuDetailActivity;
 import com.cdw.zhihutopnews.adapter.ZhihuAdapter;
 import com.cdw.zhihutopnews.bean.TopStoryItem;
 import com.cdw.zhihutopnews.bean.ZhihuDaily;
+import com.cdw.zhihutopnews.config.Config;
 import com.cdw.zhihutopnews.presenter.implePresenter.ZhihuPresenterImpl;
 import com.cdw.zhihutopnews.presenter.impleView.IZhihuFragment;
 import com.cdw.zhihutopnews.view.GridItemDividerDecoration;
@@ -54,6 +53,8 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
     MainBanner recycleHeader;
     @BindView(R.id.header)
     RecyclerViewHeader header;
+    @BindView(R.id.fragmeng_zhihu)
+    FrameLayout fragmengZhihu;
 
 
     private ZhihuPresenterImpl zhihuPresenter;
@@ -62,11 +63,10 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
     private RecyclerView.OnScrollListener loadingMoreListener;
     private MainBanner.OnItemClickListener mainBanneronClickListener;
     private View view = null;
-    private boolean connected = true;
+    private boolean connected = false;
     private boolean loading;
     private boolean monitoringConnectivity;
     private String currentLoadDate;
-
 
 
     @Nullable
@@ -106,12 +106,11 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         recycleZhihu.setAdapter(zhihuAdapter);
         recycleZhihu.addOnScrollListener(loadingMoreListener);
         header.attachTo(recycleZhihu, true);
-       recycleHeader.setOnItemClickListener(mainBanneronClickListener);
+        recycleHeader.setOnItemClickListener(mainBanneronClickListener);
 
 
-        if (connected) {
-            loadLatestStory();
-        }
+        loadLatestStory();
+
     }
 
     /**
@@ -130,7 +129,12 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
             zhihuAdapter.clearData();
         }
         currentLoadDate = "0";
-        zhihuPresenter.getLastZhihuNews();
+
+        if (connected) {
+            zhihuPresenter.getLastZhihuNews();
+        } else {
+            zhihuPresenter.getLastFromCache();
+        }
 
 
     }
@@ -144,13 +148,13 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
     }
 
 
-
     private void initialListener() {
         loadingMoreListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
             }
+
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -179,6 +183,7 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
                         }
                     });
                 }
+
                 @Override
                 public void onLost(Network network) {
                     connected = false;
@@ -187,13 +192,13 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
 
         }
 
-        mainBanneronClickListener=new MainBanner.OnItemClickListener() {
+        mainBanneronClickListener = new MainBanner.OnItemClickListener() {
             @Override
             public void onClick(View v, TopStoryItem topStoryItem) {
                 Intent intent = new Intent(getActivity(), ZhihuDetailActivity.class);
                 intent.putExtra("id", topStoryItem.getId());
                 intent.putExtra("title", topStoryItem.getTitle());
-                intent.putExtra("image",topStoryItem.getImage());
+                intent.putExtra("image", topStoryItem.getImage());
                 getActivity().startActivity(intent);
             }
         };
@@ -222,6 +227,7 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
     }
 
     private ConnectivityManager.NetworkCallback connectivityCallback;
+
     /**
      * 检查网络连接
      *
@@ -231,6 +237,8 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         final ConnectivityManager connectivityManager
                 = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        //  Log.d("ZhihuFragment", "activeNetworkInfo.isConnected():"+activeNetworkInfo.isConnected());
+
         connected = activeNetworkInfo != null && activeNetworkInfo.isConnected();
         if (!connected && progress != null) {//不判断容易抛出空指针异常
             progress.setVisibility(View.INVISIBLE);
@@ -249,7 +257,6 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         }
 
     }
-
 
 
     @Override
@@ -283,7 +290,13 @@ public class ZhihuFragment extends BaseFragment implements IZhihuFragment {
         }
     }
 
-
+    /**
+     * 日间夜间模式切换时更新UI
+     */
+    public void refreshUI() {
+        fragmengZhihu.setBackgroundColor(getResources().getColor(Config.isNight ? R.color.background_dark : R.color.background_light));
+        zhihuAdapter.notifyDataSetChanged();
+    }
 
     @Override
     public void onDestroy() {

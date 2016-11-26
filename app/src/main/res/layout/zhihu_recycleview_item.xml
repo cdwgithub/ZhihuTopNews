@@ -14,7 +14,8 @@
     card-view:cardPreventCornerOverlap="true"
     card-view:cardUseCompatPadding="true"
     card_view:cardBackgroundColor="?attr/cardview_background"
-    card_view:cardCornerRadius="3dp">
+    card_view:cardCornerRadius="3dp"
+    android:id="@+id/zhihu_item_carview">
 
     <LinearLayout
         android:id="@+id/zhihu_item_layout"
