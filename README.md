@@ -28,4 +28,7 @@
 后续还会完善更新。。。。
 
 
+![](https://github.com/cdwgithub/ZhihuTopNews/blob/master/screenshots/GIF.gif)  
+
+
 
